@@ -1,9 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import '../services/api_service.dart';
 import '../widgets/image_display.dart';
-import 'package:provider/provider.dart';
+import '../widgets/custom_button.dart';
+import '../bloc/object_removal/object_removal_bloc.dart';
+import '../bloc/object_removal/object_removal_event.dart';
+import '../bloc/object_removal/object_removal_state.dart';
 
 class ObjectRemovalScreen extends StatefulWidget {
   const ObjectRemovalScreen({super.key});
@@ -13,45 +16,39 @@ class ObjectRemovalScreen extends StatefulWidget {
 }
 
 class _ObjectRemovalScreenState extends State<ObjectRemovalScreen> {
-  File? _selectedImage;
-  String? _processedImagePath;
-  bool _isLoading = false;
-
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
     if (picked != null) {
-      setState(() {
-        _selectedImage = File(picked.path);
-        _processedImagePath = null;
-      });
+      BlocProvider.of<ObjectRemovalBloc>(context)
+          .add(SelectImageForRemovalEvent(File(picked.path)));
     }
   }
 
-  Future<void> _removeObject() async {
-    if (_selectedImage == null) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    final apiService = Provider.of<ApiService>(context, listen: false);
-    String? path = await apiService.removeObject(image: _selectedImage!);
-
-    setState(() {
-      _processedImagePath = path;
-      _isLoading = false;
-    });
+  void _removeObject() {
+    BlocProvider.of<ObjectRemovalBloc>(context).add(RemoveObjectEvent());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Remove Object'),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
+      appBar: AppBar(
+        title: const Text('Remove Object'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: BlocListener<ObjectRemovalBloc, ObjectRemovalState>(
+          listener: (context, state) {
+            if (state is ObjectRemovalErrorState) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.message)),
+              );
+            } else if (state is ObjectRemovedState) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Object Removed Successfully')),
+              );
+            }
+          },
           child: Column(
             children: [
               CustomButton(
@@ -64,11 +61,23 @@ class _ObjectRemovalScreenState extends State<ObjectRemovalScreen> {
                 onPressed: _removeObject,
               ),
               const SizedBox(height: 20),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : ImageDisplay(imagePath: _processedImagePath),
+              BlocBuilder<ObjectRemovalBloc, ObjectRemovalState>(
+                builder: (context, state) {
+                  if (state is ObjectRemovingState) {
+                    return const CircularProgressIndicator();
+                  } else if (state is ObjectRemovedState) {
+                    return ImageDisplay(imagePath: state.processedImagePath);
+                  } else if (state is ObjectSelectedForRemovalState) {
+                    return ImageDisplay(imagePath: state.imagePath);
+                  } else {
+                    return const Text('No image selected.');
+                  }
+                },
+              ),
             ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

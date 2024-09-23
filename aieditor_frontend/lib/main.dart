@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'bloc/bloc_observer.dart';
+import 'bloc/image_generation/image_generation_bloc.dart';
+import 'bloc/object_removal/object_removal_bloc.dart';
 import 'services/api_service.dart';
 import 'screens/home_screen.dart';
 
 void main() {
+  Bloc.observer = AppBlocObserver();
+
   runApp(
-    MultiProvider(
+    MultiBlocProvider(
       providers: [
-        Provider<ApiService>(
-          create: (_) => ApiService(baseUrl: 'http://your-backend-server.com:5000'),
+        BlocProvider<ImageGenerationBloc>(
+          create: (context) => ImageGenerationBloc(
+                 apiService: ApiService(baseUrl: 'http://192.168.1.100:5000'),
+          ),
+        ),
+        BlocProvider<ObjectRemovalBloc>(
+          create: (context) => ObjectRemovalBloc(
+                 apiService: ApiService(baseUrl: 'http://192.168.1.100:5000'),
+          ),
         ),
       ],
       child: const MyApp(),
