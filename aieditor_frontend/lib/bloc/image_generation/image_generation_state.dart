@@ -9,6 +9,17 @@ abstract class ImageGenerationState extends Equatable {
 
 class ImageGenerationInitial extends ImageGenerationState {}
 
+class ImagesLoadingState extends ImageGenerationState {}
+
+class ImagesLoadedState extends ImageGenerationState {
+  final List<String> images;
+
+  const ImagesLoadedState(this.images);
+
+  @override
+  List<Object?> get props => [images];
+}
+
 class ImageProcessingState extends ImageGenerationState {}
 
 class ImageGeneratedState extends ImageGenerationState {

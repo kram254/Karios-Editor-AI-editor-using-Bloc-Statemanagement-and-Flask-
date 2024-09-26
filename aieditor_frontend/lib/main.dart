@@ -14,12 +14,12 @@ void main() {
       providers: [
         BlocProvider<ImageGenerationBloc>(
           create: (context) => ImageGenerationBloc(
-                 apiService: ApiService(baseUrl: 'http://192.168.1.100:5000'),
+                 apiService: ApiService(baseUrl: 'http://192.168.100.121:5000'),
           ),
         ),
         BlocProvider<ObjectRemovalBloc>(
           create: (context) => ObjectRemovalBloc(
-                 apiService: ApiService(baseUrl: 'http://192.168.1.100:5000'),
+                 apiService: ApiService(baseUrl: 'http://192.168.100.121:5000'),
           ),
         ),
       ],
@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AI Editor Frontend',
+      title: 'Karios Creations',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

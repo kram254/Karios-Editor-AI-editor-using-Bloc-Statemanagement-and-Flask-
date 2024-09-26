@@ -16,6 +16,8 @@ class GenerateImageEvent extends ImageGenerationEvent {
   List<Object?> get props => [prompt];
 }
 
+class LoadImagesEvent extends ImageGenerationEvent {}
+
 
 
 

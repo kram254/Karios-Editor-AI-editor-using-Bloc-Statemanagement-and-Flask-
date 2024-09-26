@@ -1,27 +1,27 @@
-import 'package:flutter/material.dart';
+   import 'package:flutter/material.dart';
 
-class ImageDisplay extends StatelessWidget {
-  final String? imagePath;
+   class ImageDisplay extends StatelessWidget {
+     final String imagePath;
 
-  const ImageDisplay({super.key, this.imagePath});
+     const ImageDisplay({Key? key, required this.imagePath}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    if (imagePath == null) {
-      return const Text('No image selected.');
-    } else {
-      return Expanded(
-        child: Image.network(
-          imagePath!,
-          loadingBuilder: (context, child, progress) {
-            if (progress == null) return child;
-            return const Center(child: CircularProgressIndicator());
-          },
-          errorBuilder: (context, error, stackTrace) {
-            return const Text('Error loading image.');
-          },
-        ),
-      );
-    }
-  }
-}
+     @override
+     Widget build(BuildContext context) {
+       return Image.network(
+         imagePath,
+         loadingBuilder: (context, child, loadingProgress) {
+           if (loadingProgress == null) return child;
+           return Center(
+             child: CircularProgressIndicator(
+               value: loadingProgress.expectedTotalBytes != null
+                   ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                   : null,
+             ),
+           );
+         },
+         errorBuilder: (context, error, stackTrace) {
+           return const Text('Failed to load image.');
+         },
+       );
+     }
+   }
