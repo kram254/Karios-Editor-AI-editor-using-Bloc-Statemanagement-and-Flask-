@@ -11,15 +11,17 @@
       Widget build(BuildContext context) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text('AI Editor'),
+            title: const Text('Karios Creations', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),),
+            
           ),
           body: Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  height: 100,
-                  width: 100,
+                  height: 500,
+                  width: 200,
                   decoration: BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage('assets/images/logo.png'),
@@ -27,7 +29,7 @@
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 5),
                 CustomButton(
                   text: 'Generate Image',
                   onPressed: () {
