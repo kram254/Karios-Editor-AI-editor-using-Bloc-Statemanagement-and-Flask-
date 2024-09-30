@@ -43,25 +43,34 @@ class ApiService {
     }
   }
 
-  // Future<String?> processImage({
-  //   required String prompt,
-  // }) async {
-  //   var uri = Uri.parse('$baseUrl/process_image');
-  //   var request = http.MultipartRequest('POST', uri)
-  //     ..fields['prompt'] = prompt;
 
-  //   var response = await request.send();
 
-  //   if (response.statusCode == 200) {
-  //     var respStr = await response.stream.bytesToString();
-  //     var data = json.decode(respStr);
-  //     return data['filepath'];
-  //   } else {
-  //     print('Error: ${response.statusCode}');
-  //     return null;
-  //   }
-  // }
 
+   Future<Map<String, dynamic>?> postMultipart(String endpoint, Map<String, String> fields, File file) async {
+    try {
+      var uri = Uri.parse('$baseUrl$endpoint');
+      var request = http.MultipartRequest('POST', uri)
+        ..fields.addAll(fields)
+        ..files.add(await http.MultipartFile.fromPath('image', file.path));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        var respStr = await response.stream.bytesToString();
+        return json.decode(respStr);
+      } else {
+        var respStr = await response.stream.bytesToString();
+        return {'error': json.decode(respStr)['error'] ?? 'Unknown error'};
+      }
+    } catch (e) {
+      return {'error': e.toString()};
+    }
+  }
+
+
+
+
+ 
 
   Future<List<String>?> fetchGeneratedImages() async {
     try {
@@ -83,21 +92,6 @@ class ApiService {
   }
 
 
-
-
-  // Future<List<String>?> fetchGeneratedImages() async {
-  //   var uri = Uri.parse('$baseUrl/list_images');
-  //   var response = await http.get(uri);
-
-  //   if (response.statusCode == 200) {
-  //     var data = json.decode(response.body);
-  //     List<String> images = List<String>.from(data['images']);
-  //     return images;
-  //   } else {
-  //     print('Error fetching images: ${response.statusCode}');
-  //     return null;
-  //   }
-  // }
 
   Future<String?> removeObject({required File image}) async {
     var uri = Uri.parse('$baseUrl/remove_object');

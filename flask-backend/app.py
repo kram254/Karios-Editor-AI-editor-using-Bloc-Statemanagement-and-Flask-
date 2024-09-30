@@ -2,10 +2,16 @@ from flask import Flask, request, jsonify, send_from_directory, url_for
 from flask_cors import CORS
 import os
 from services.image_generation_service import process_image
-from services.object_removal_service import remove_object
+# from services.object_removal_service import remove_object
+
+from routes.object_cutter import object_cutter_bp
 
 app = Flask(__name__)
 CORS(app)
+
+
+# Register Blueprints
+app.register_blueprint(object_cutter_bp)
 
 # Configure directories
 GENERATED_IMAGES_DIR = os.path.join('static', 'generated_images')
