@@ -15,17 +15,17 @@ void main() {
       providers: [
         BlocProvider<ImageGenerationBloc>(
           create: (context) => ImageGenerationBloc(
-            apiService: ApiService(baseUrl: 'http://192.168.100.121:5000'),
+            apiService: ApiService(baseUrl: 'http://127.0.0.1:5000'),
           ),
         ),
         BlocProvider<ObjectRemovalBloc>(
           create: (context) => ObjectRemovalBloc(
-            apiService: ApiService(baseUrl: 'http://192.168.100.121:5000'),
+            apiService: ApiService(baseUrl: 'http://127.0.0.1:5000'),
           ),
         ),
         BlocProvider<ObjectCutterBloc>(
           create: (context) => ObjectCutterBloc(
-            apiService: ApiService(baseUrl: 'http://192.168.100.121:5000'),
+            apiService: ApiService(baseUrl: 'http://127.0.0.1:5000'),
           ),
         ),
       ],
