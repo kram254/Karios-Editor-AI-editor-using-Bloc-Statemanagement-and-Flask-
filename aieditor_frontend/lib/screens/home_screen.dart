@@ -10,12 +10,25 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Karios Creations'),
+        title: const Center(
+          child: Text('Karios Creations'),
+        ),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+
+            Padding(
+              padding: const EdgeInsets.only(bottom: 30.0),
+              child: Image.asset(
+                'assets/images/logo.png', 
+                width: 200, 
+                height: 300, 
+                fit: BoxFit.contain,
+              ),
+            ),
+
             ElevatedButton(
               onPressed: () {
                 Navigator.push(

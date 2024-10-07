@@ -58,6 +58,7 @@ def process_image(height, width, steps, scales, prompt, seed):
         )
 
         output_dir = os.path.join('static', 'generated_images')
+        os.makedirs(output_dir, exist_ok=True)
         filename = get_next_image_filename(output_dir)
         output_path = os.path.join(output_dir, filename)
 
@@ -76,7 +77,7 @@ def process_image(height, width, steps, scales, prompt, seed):
             shutil.move(result, new_output_path)
             output_path = new_output_path
 
-        # Generate the URL for the generated image
+        # Generate the URL for the generated image using 'serve_image' endpoint
         image_url = url_for('serve_image', filename=f'generated_images/{filename}', _external=True)
         return image_url
 

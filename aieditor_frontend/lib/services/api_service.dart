@@ -67,6 +67,33 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>?> uploadImage({
+    required File imageFile,
+    String prompt = '',
+  }) async {
+    try {
+      var uri = Uri.parse('$baseUrl/api/object_cutter');
+      var request = http.MultipartRequest('POST', uri)
+        ..files.add(await http.MultipartFile.fromPath('image', imageFile.path))
+        ..fields['prompt'] = prompt;
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        var respStr = await response.stream.bytesToString();
+        var data = json.decode(respStr);
+        return data;
+      } else {
+        var respStr = await response.stream.bytesToString();
+        var data = json.decode(respStr);
+        return {'error': data['error'] ?? 'Unknown error'};
+      }
+    } catch (e) {
+      return {'error': e.toString()};
+    }
+  }
+
+
 
 
 

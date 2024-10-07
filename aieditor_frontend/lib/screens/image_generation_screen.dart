@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widgets/custom_button.dart';
@@ -19,6 +21,18 @@ class ImageGenerationScreen extends StatefulWidget {
 class _ImageGenerationScreenState extends State<ImageGenerationScreen> {
   final TextEditingController _promptController = TextEditingController();
 
+
+   // Define a list of sample prompts
+  final List<String> _samplePrompts = [
+    'A serene landscape with mountains',
+    'Panavision action shot of a Golf GTI Mk5 . F1 NFS MOST WANTED racing car, centered, symmetrical, cinematic still. Hyper-realistic, Slight motion blur, Vibrant colors, stark and beautiful lighting. 4K ultra-realistic. NFS spec, tuned, NFS theme wrapped. Tokyo night loght Street shot',
+    // 'A cute cat sitting on a windowsill',
+    // 'A vintage car driving through the desert',
+  ];
+
+  Timer? _timer; 
+  int _remainingSeconds = 90; 
+
   @override
   void initState() {
     super.initState();
@@ -26,6 +40,13 @@ class _ImageGenerationScreenState extends State<ImageGenerationScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       BlocProvider.of<ImageGenerationBloc>(context).add(LoadImagesEvent());
     });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); 
+    _promptController.dispose(); 
+    super.dispose();
   }
 
   void _generateImage() {
@@ -67,6 +88,40 @@ class _ImageGenerationScreenState extends State<ImageGenerationScreen> {
     }
   }
 
+
+ // Function to populate the prompt field
+  void _populatePrompt(String prompt) {
+    setState(() {
+      _promptController.text = prompt;
+    });
+  }
+
+  // Function to start the countdown timer
+  void _startTimer() {
+    setState(() {
+      _remainingSeconds = 90; // Reset the timer to 1 minute 30 seconds
+    });
+
+    _timer?.cancel(); // Cancel any existing timer
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_remainingSeconds == 0) {
+        timer.cancel();
+        // Optionally, you can handle the timeout scenario here
+      } else {
+        setState(() {
+          _remainingSeconds--;
+        });
+      }
+    });
+  }
+
+  // Function to stop the countdown timer
+  void _stopTimer() {
+    _timer?.cancel();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,8 +130,71 @@ class _ImageGenerationScreenState extends State<ImageGenerationScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
+
+        child: BlocListener<ImageGenerationBloc, ImageGenerationState>(
+          listener: (context, state) {
+            if (state is ImagesLoadingState || state is ImageProcessingState) {
+              // Start the timer when image generation starts
+              _startTimer();
+            } else {
+              // Stop the timer when image generation ends or fails
+              _stopTimer();
+            }
+          },
+
+        
+
         child: Column(
           children: [
+            const Padding(
+              padding: EdgeInsets.all(13.0),
+              child: SizedBox(
+                child: Text("Sample text prompts", style: TextStyle(fontWeight: FontWeight.w500),)
+              ),
+            ),
+            // Sample Prompts GridView
+          SizedBox(
+              height: 120, // Adjusted height to accommodate cards
+              child: GridView.builder(
+                // Define the number of columns
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, // Two columns
+                  mainAxisSpacing: 10, // Spacing between rows
+                  crossAxisSpacing: 10, // Spacing between columns
+                  childAspectRatio: 3 / 2, // Aspect ratio of the cards
+                ),
+                itemCount: _samplePrompts.length,
+                // Disable scrolling inside GridView to allow the parent to handle scrolling
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  final prompt = _samplePrompts[index];
+                  return GestureDetector(
+                    onTap: () => _populatePrompt(prompt),
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            prompt,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+
             TextField(
               controller: _promptController,
               decoration: const InputDecoration(
@@ -169,6 +287,7 @@ class _ImageGenerationScreenState extends State<ImageGenerationScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -1,5 +1,5 @@
 # flask_backend/app.py
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, url_for
 from flask_cors import CORS
 import os
 from services.image_generation_service import process_image
@@ -20,7 +20,7 @@ os.makedirs(PROCESSED_IMAGES_DIR, exist_ok=True)
 os.makedirs(UPLOADED_IMAGES_DIR, exist_ok=True)
 
 @app.route('/static/<path:filename>')
-def static_files(filename):
+def serve_image(filename):
     """
     Serve static files from the 'static' directory.
     """
@@ -45,9 +45,57 @@ def handle_process_image():
         return jsonify({"filepath": image_url})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/list_images', methods=['GET'])
+def list_images():
+    """
+    List all generated images.
+    """
+    try:
+        image_dir = GENERATED_IMAGES_DIR
+        images = [
+            f for f in os.listdir(image_dir)
+            if os.path.isfile(os.path.join(image_dir, f)) and f.lower().endswith(('.png', '.jpg', '.jpeg'))
+        ]
+        # Sort images by modification time (newest first)
+        images.sort(key=lambda x: os.path.getmtime(os.path.join(image_dir, x)), reverse=True)
+        
+        # Generate full URLs for the images
+        image_urls = [
+            url_for('serve_image', filename=f'generated_images/{image}', _external=True)
+            for image in images
+        ]
+        return jsonify({"images": image_urls}), 200
+    except Exception as e:
+        print(f"Error in list_images: {e}")  
+        return jsonify({"error": str(e)}), 500
+
+    
+
+
+    
+# @app.route('/list_images', methods=['GET'])
+# def list_generated_images():
+#     try:
+#         image_dir = GENERATED_IMAGES_DIR
+#         # All files
+#         images = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+        
+#         # Sorting
+#         images.sort(key=lambda x: os.path.getmtime(os.path.join(image_dir, x)), reverse=True)
+         
+#         image_urls = [
+#             url_for('serve_image', filename=f'generated_images/{image}', _external=True) 
+#             for image in images
+#         ]
+#         return jsonify({"images": image_urls})
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500    
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
 
 
 
